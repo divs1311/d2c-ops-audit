@@ -13,9 +13,25 @@
   --border-radius-lg: 12px;
 }
 
+/* 1. Soft, modern gradient background for the Streamlit iframe */
 body {
-  background-color: #ffffff; /* This forces a clean white background inside the Streamlit iframe */
+  background: linear-gradient(135deg, #F0F4F8 0%, #DFE7EF 100%);
   color: var(--color-text-primary);
+  padding: 2rem 1rem;
+  min-height: 100vh;
+}
+
+/* 2. Turn the main wrapper into a stunning floating dashboard card */
+.w {
+  background-color: var(--color-background-primary);
+  font-family: var(--font-sans);
+  padding: 3rem !important; /* Added padding to give it breathing room */
+  margin: 0 auto;
+  max-width: 720px;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
