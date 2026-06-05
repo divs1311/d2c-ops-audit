@@ -5,7 +5,7 @@ import streamlit.components.v1 as components
 st.set_page_config(layout="wide", page_title="D2C Ops Audit")
 
 # Read the HTML file
-with open("indian_d2c_multichannel_ops_audit_tool.html", "r", encoding="utf-8") as f:
+with open("index.html", "r", encoding="utf-8") as f:
     html_content = f.read()
 
 # Render the HTML within Streamlit
