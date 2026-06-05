@@ -1,4 +1,22 @@
 <style>
+  :root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-background-info: #f0f9ff;
+  --color-border-secondary: #cbd5e1;
+  --color-border-tertiary: #e2e8f0;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-info: #0284c7;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
+
+body {
+  background-color: #ffffff; /* This forces a clean white background inside the Streamlit iframe */
+  color: var(--color-text-primary);
+}
 *{box-sizing:border-box;margin:0;padding:0;}
 h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
 .w{font-family:var(--font-sans);padding:1.5rem 0;max-width:680px;}
