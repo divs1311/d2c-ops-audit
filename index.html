@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D2C Multi-Channel Ops Audit</title>
+<!-- Tabler Icons for sleek dashboard visuals -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-main: #F8FAFC;
+    --bg-card: #FFFFFF;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --border-light: #E2E8F0;
+    --primary: #2563EB;
+    --primary-light: #EFF6FF;
+    --success: #10B981;
+    --success-light: #ECFDF5;
+    --warning: #F59E0B;
+    --warning-light: #FFFBEB;
+    --danger: #EF4444;
+    --danger-light: #FEF2F2;
+    --radius: 12px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.5;
+    margin: 0;
+    padding: 2rem 1rem;
+  }
+
+  .audit-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  }
+
+  .header-box {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .header-box h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+  }
+
+  .header-box p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .section-title i { font-size: 16px; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-main);
+    background-color: var(--bg-main);
+    outline: none;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  
+  select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-muted); }
+
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .toggle-btn {
+    padding: 10px 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .toggle-btn:hover { border-color: var(--text-muted); color: var(--text-main); box-shadow: var(--shadow); transform: translateY(-1px); }
+  
+  /* Active states for different categories */
+  .toggle-btn.channel.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+  .toggle-btn.tool.active { border-color: var(--warning); background: var(--warning-light); color: #B45309; }
+  .toggle-btn.pain.active { border-color: var(--danger); background: var(--danger-light); color: var(--danger); }
+
+  .run-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--primary);
+    color: white;
+    margin-top: 2.5rem;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+  }
+
+  .run-btn:hover { background: #1D4ED8; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); }
+
+  .results { display: none; margin-top: 3rem; animation: fadeIn 0.6s ease-out; }
+  .results.show { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 2rem;
+  }
+
+  .score-card, .impact-card {
+    padding: 1.5rem;
+    background: var(--bg-main);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .score-ring { width: 80px; height: 80px; flex-shrink: 0; }
+  .metric-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; margin: 0 0 4px; }
+  .metric-val { font-size: 32px; font-weight: 700; color: var(--text-main); margin: 0; line-height: 1; }
+  .metric-sub { font-size: 13px; color: var(--text-muted); margin: 6px 0 0; }
+
+  .impact-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: var(--danger-light); color: var(--danger);
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+  }
+
+  .dim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+  .dim-card { padding: 1.25rem; border: 1px solid var(--border-light); border-radius: var(--radius); background: var(--bg-card); transition: box-shadow 0.2s; }
+  .dim-card:hover { box-shadow: var(--shadow); }
+  .dim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .dim-name { font-size: 14px; font-weight: 600; }
+  .dim-score { font-size: 14px; font-weight: 700; }
+  .dim-bar-bg { height: 6px; background: var(--border-light); border-radius: 3px; margin-bottom: 8px; overflow: hidden; }
+  .dim-bar { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+  .dim-issue { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+
+  .rec-item { display: flex; gap: 16px; padding: 16px; border: 1px solid var(--border-light); border-radius: var(--radius); margin-bottom: 12px; background: var(--bg-card); }
+  .rec-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+  .rec-icon.red { background: var(--danger-light); color: var(--danger); }
+  .rec-icon.amber { background: var(--warning-light); color: var(--warning); }
+  .rec-icon.green { background: var(--success-light); color: var(--success); }
+  .rec-heading { font-size: 15px; font-weight: 600; margin: 0 0 6px; color: var(--text-main); }
+  .rec-desc { font-size: 13px; color: var(--text-muted); margin: 0 0 10px; }
+  .rec-fix { font-size: 13px; color: var(--primary); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: var(--primary-light); border-radius: 6px; }
+
+  .stack-box { margin-top: 2rem; padding: 1.5rem; background: #0F172A; border-radius: var(--radius); color: white; }
+  .stack-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .pill { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;}
+  .pill.base { background: #3B82F6; color: white; border: 1px solid #60A5FA; }
+  .pill.core { background: #334155; color: #E2E8F0; border: 1px solid #475569; }
+
+  .print-btn { background: transparent; border: 1px solid var(--border-light); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; color: var(--text-muted); margin-top: 20px; float: right; }
+  .print-btn:hover { background: var(--bg-main); color: var(--text-main); }
+
+  @media print {
+    body { background: white; }
+    .audit-wrap { box-shadow: none; border: none; padding: 0; }
+    .run-btn, .print-btn, .section-title, .form-grid, .btn-grid { display: none; }
+    .results { display: block !important; margin-top: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="audit-wrap">
+  <div class="header-box">
+    <h2>D2C Multi-Channel Ops Diagnostic</h2>
+    <p>AI-Driven tech stack and operational health audit for high-growth Indian sellers.</p>
+  </div>
+
+  <p class="section-title"><i class="ti ti-user-scan"></i> 01 — Business Profile</p>
+  <div class="form-grid">
+    <div class="field">
+      <label>Monthly Order Volume</label>
+      <select id="order-vol">
+        <option value="">Select range</option>
+        <option value="startup">Under 500 orders/mo</option>
+        <option value="growing">500 – 5,000 orders/mo</option>
+        <option value="mid">5,000 – 20,000 orders/mo</option>
+        <option value="large">20,000+ orders/mo</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Active SKU Catalog Size</label>
+      <select id="sku-count">
+        <option value="">Select range</option>
+        <option value="small">Under 100 SKUs</option>
+        <option value="mid">100 – 1,000 SKUs</option>
+        <option value="large">1,000 – 10,000 SKUs</option>
+        <option value="xlarge">10,000+ SKUs</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="section-title"><i class="ti ti-building-store"></i> 02 — Active Sales Channels</p>
+  <div class="btn-grid" id="channels">
+    <button class="toggle-btn channel" data-val="amazon" onclick="toggle(this, 'selChannels')"><i class="ti ti-brand-amazon"></i> Amazon.in</button>
+    <button class="toggle-btn channel" data-val="flipkart" onclick="toggle(this, 'selChannels')"><i class="ti ti-shopping-cart"></i> Flipkart</button>
+    <button class="toggle-btn channel" data-val="meesho" onclick="toggle(this, 'selChannels')"><i class="ti ti-basket"></i> Meesho</button>
+    <button class="toggle-btn channel" data-val="myntra" onclick="toggle(this, 'selChannels')"><i class="ti ti-hanger"></i> Myntra</button>
+    <button class="toggle-btn channel" data-val="shopify" onclick="toggle(this, 'selChannels')"><i class="ti ti-brand-shopify"></i> Shopify</button>
+    <button class="toggle-btn channel" data-val="b2b" onclick="toggle(this, 'selChannels')"><i class="ti ti-briefcase"></i> B2B / Wholesale</button>
+  </div>
+
+  <p class="section-title"><i class="ti ti-tool"></i> 03 — Current Tech Stack</p>
+  <div class="btn-grid" id="tools">
+    <button class="toggle-btn tool" data-val="excel" onclick="toggle(this, 'selTools')"><i class="ti ti-file-spreadsheet"></i> Excel / Manual</button>
+    <button class="toggle-btn tool" data-val="tally" onclick="toggle(this, 'selTools')"><i class="ti ti-calculator"></i> Tally ERP</button>
+    <button class="toggle-btn tool" data-val="shiprocket" onclick="toggle(this, 'selTools')"><i class="ti ti-truck-delivery"></i> Shiprocket</button>
+    <button class="toggle-btn tool" data-val="unicommerce" onclick="toggle(this, 'selTools')"><i class="ti ti-server"></i> Unicommerce</button>
+    <button class="toggle-btn tool" data-val="custom" onclick="toggle(this, 'selTools')"><i class="ti ti-code"></i> In-house Custom</button>
+  </div>
+
+  <p class="section-title"><i class="ti ti-alert-triangle"></i> 04 — Primary Pain Points</p>
+  <div class="btn-grid" id="pains">
+    <button class="toggle-btn pain" data-val="oversell" onclick="toggle(this, 'selPains')"><i class="ti ti-packages"></i> Overselling / Stockouts</button>
+    <button class="toggle-btn pain" data-val="listing" onclick="toggle(this, 'selPains')"><i class="ti ti-list"></i> Slow Listing Updates</button>
+    <button class="toggle-btn pain" data-val="shipping" onclick="toggle(this, 'selPains')"><i class="ti ti-truck-off"></i> Dispatch Delays</button>
+    <button class="toggle-btn pain" data-val="returns" onclick="toggle(this, 'selPains')"><i class="ti ti-arrow-back-up"></i> High Return RTO</button>
+    <button class="toggle-btn pain" data-val="reporting" onclick="toggle(this, 'selPains')"><i class="ti ti-chart-pie-off"></i> Blind P&L / Margins</button>
+    <button class="toggle-btn pain" data-val="manual" onclick="toggle(this, 'selPains')"><i class="ti ti-clock"></i> Heavy Manual Work</button>
+  </div>
+
+  <button class="run-btn" onclick="runAudit()"><i class="ti ti-cpu"></i> Generate Diagnostic & ROI Report</button>
+
+  <div class="results" id="results">
+    <div class="dashboard-grid">
+      <div class="score-card">
+        <svg class="score-ring" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r="30" fill="none" stroke="var(--border-light)" stroke-width="6"/>
+          <circle id="score-arc" cx="36" cy="36" r="30" fill="none" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" transform="rotate(-90 36 36)" style="transition: stroke-dashoffset 1.2s ease-out;"/>
+          <text id="score-text" x="36" y="42" text-anchor="middle" font-size="18" font-weight="700" fill="var(--text-main)">0</text>
+        </svg>
+        <div>
+          <p class="metric-label">System Health Score</p>
+          <p class="metric-val" id="score-display">—</p>
+          <p class="metric-sub" id="score-verdict">—</p>
+        </div>
+      </div>
+      
+      <!-- NEW TECHNICAL FEATURE: ROI/Leakage Calculator -->
+      <div class="impact-card">
+        <div class="impact-icon"><i class="ti ti-currency-rupee"></i></div>
+        <div>
+          <p class="metric-label">Est. Monthly Leakage</p>
+          <p class="metric-val" id="leakage-display" style="color: var(--danger);">—</p>
+          <p class="metric-sub">Capital lost to SLA breaches, RTOs & manual errors</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dim-grid" id="dim-grid"></div>
+
+    <p class="section-title" style="margin-bottom:12px;"><i class="ti ti-target"></i> Infrastructure Recommendations</p>
+    <div id="rec-list"></div>
+
+    <div class="stack-box">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <p style="font-size: 16px; font-weight: 600; margin: 0 0 4px;">Recommended Enterprise Architecture</p>
+          <p style="font-size: 13px; color: #94A3B8; margin: 0;">Optimized Base.com modular deployment for your specific volume and channel mix.</p>
+        </div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Base.com_logo.svg/512px-Base.com_logo.svg.png" alt="Base.com" style="height:24px; filter:brightness(0) invert(1);">
+      </div>
+      <div class="stack-pills" id="stack-pills"></div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()"><i class="ti ti-printer"></i> Export PDF Report</button>
+  </div>
+</div>
+
+<script>
+  let state = { selChannels: [], selTools: [], selPains: [] };
+
+  function toggle(btn, arrName) {
+    const val = btn.dataset.val;
+    if (btn.classList.contains('active')) {
+      btn.classList.remove('active');
+      state[arrName] = state[arrName].filter(x => x !== val);
+    } else {
+      btn.classList.add('active');
+      state[arrName].push(val);
+    }
+  }
+
+  function calculateFinancialImpact(vol, pains) {
+    // Advanced ROI logic mapping volume to average order velocity
+    const ordersMap = { 'startup': 400, 'growing': 3000, 'mid': 12000, 'large': 35000 };
+    const orders = ordersMap[vol] || 0;
+    const aov = 850; // Assumed Average Order Value in INR
+    
+    let leakagePct = 0.015; // Baseline operational friction
+    if(pains.includes('oversell')) leakagePct += 0.025; // Cancelled orders
+    if(pains.includes('returns')) leakagePct += 0.035; // RTO shipping costs & damaged inventory
+    if(pains.includes('manual')) leakagePct += 0.015; // Labor cost overhead
+    if(pains.includes('reporting')) leakagePct += 0.01; // Unnoticed margin erosion
+    
+    const monthlyLoss = orders * aov * leakagePct;
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(monthlyLoss);
+  }
+
+  function runAudit() {
+    const vol = document.getElementById('order-vol').value;
+    const sku = document.getElementById('sku-count').value;
+    
+    if(!vol || !sku || state.selChannels.length === 0) {
+      alert('Please complete the Business Profile and select at least one channel.');
+      return;
+    }
+
+    const dims = computeDims(vol, sku);
+    const overall = Math.round(dims.reduce((acc, curr) => acc + curr.score, 0) / dims.length);
+    const recs = buildRecs(sku);
+    const stack = buildStack(vol, sku);
+
+    const res = document.getElementById('results');
+    res.classList.add('show');
+    res.scrollIntoView({behavior: 'smooth', block: 'start'});
+
+    // Financial calculations
+    document.getElementById('leakage-display').textContent = calculateFinancialImpact(vol, state.selPains);
+
+    setTimeout(() => {
+      const arc = document.getElementById('score-arc');
+      const circ = 188.5;
+      arc.setAttribute('stroke-dashoffset', circ - (circ * overall / 100));
+      const color = overall >= 75 ? 'var(--success)' : overall >= 50 ? 'var(--warning)' : 'var(--danger)';
+      arc.setAttribute('stroke', color);
+      document.getElementById('score-text').textContent = overall;
+      document.getElementById('score-display').textContent = overall + ' / 100';
+      document.getElementById('score-verdict').textContent = overall >= 75 ? 'Healthy architecture. Ready for scale.' : 'High fragmentation. Immediate tech consolidation required.';
+
+      const dg = document.getElementById('dim-grid'); dg.innerHTML = '';
+      dims.forEach(d => {
+        const c = d.score >= 75 ? 'var(--success)' : d.score >= 50 ? 'var(--warning)' : 'var(--danger)';
+        dg.innerHTML += `
+          <div class="dim-card">
+            <div class="dim-header">
+              <span class="dim-name">${d.name}</span>
+              <span class="dim-score" style="color:${c}">${d.score}%</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar" style="width:${d.score}%;background:${c};"></div></div>
+            <div class="dim-issue">${d.issue}</div>
+          </div>`;
+      });
+
+      const rl = document.getElementById('rec-list'); rl.innerHTML = '';
+      recs.forEach(r => {
+        rl.innerHTML += `
+          <div class="rec-item">
+            <div class="rec-icon ${r.sev}"><i class="ti ti-${r.icon}"></i></div>
+            <div>
+              <p class="rec-heading">${r.title}</p>
+              <p class="rec-desc">${r.desc}</p>
+              <span class="rec-fix"><i class="ti ti-check"></i> Base.com Solution: ${r.fix}</span>
+            </div>
+          </div>`;
+      });
+
+      const sp = document.getElementById('stack-pills'); sp.innerHTML = '';
+      stack.base.forEach(m => sp.innerHTML += `<span class="pill base"><i class="ti ti-bolt"></i> Base ${m}</span>`);
+      stack.core.forEach(m => sp.innerHTML += `<span class="pill core"><i class="ti ti-plug-connected"></i> ${m}</span>`);
+    }, 100);
+  }
+
+  function computeDims(vol, sku) {
+    const isManual = state.selTools.includes('excel') || state.selTools.length === 0;
+    const hasERP = state.selTools.includes('unicommerce');
+    
+    let inv = 100, list = 100, auto = 100;
+    
+    if (isManual) { inv -= 45; list -= 30; auto -= 50; }
+    if (state.selPains.includes('oversell')) inv -= 30;
+    if (state.selPains.includes('listing') || sku === 'xlarge') list -= 35;
+    if (state.selPains.includes('manual')) auto -= 35;
+    if (state.selChannels.length > 3 && !hasERP) { inv -= 20; auto -= 20; }
+
+    return [
+      {name: 'Inventory Sync', score: Math.max(10, inv), issue: inv < 60 ? 'Severe risk of marketplace SLA breaches due to stockouts.' : 'Inventory buffers are holding.'},
+      {name: 'Catalog Agility', score: Math.max(10, list), issue: list < 60 ? 'Manual mapping creates go-to-market delays for new SKUs.' : 'Catalog mapped effectively.'},
+      {name: 'Ops Automation', score: Math.max(10, auto), issue: auto < 60 ? 'Linear scaling block: headcount must grow with order volume.' : 'Workflow automation is active.'}
+    ];
+  }
+
+  function buildRecs(sku) {
+    let recs = [];
+    if (state.selPains.includes('oversell') || state.selChannels.length > 2) {
+      recs.push({sev: 'red', icon: 'server-cog', title: 'Implement Centralized OMS/IMS', desc: 'Fragmented stock pools across marketplaces are causing overselling and suppressing true listing depth.', fix: 'Bi-directional API sync across all selected channels via Base.com.'});
+    }
+    if (state.selPains.includes('listing') || ['large', 'xlarge'].includes(sku)) {
+      recs.push({sev: 'amber', icon: 'category', title: 'Automated AI Categorization', desc: 'Mapping attributes across Amazon, Flipkart, and Myntra manually for large catalogs is unsustainable.', fix: 'Base.com AI auto-mapping and bulk listing.'});
+    }
+    if (state.selPains.includes('manual') || state.selTools.includes('excel')) {
+      recs.push({sev: 'amber', icon: 'settings-automation', title: 'Event-Driven Workflow Automation', desc: 'Customer support and fulfillment are spending hours on repetitive status updates.', fix: 'Base Workflow: Auto-generate invoices, tags, and tracking emails.'});
+    }
+    return recs.length ? recs : [{sev: 'green', icon: 'check', title: 'System Optimized', desc: 'Core ops are stable.', fix: 'Explore advanced Base.com B2B modules.'}];
+  }
+
+  function buildStack(vol, sku) {
+    let base = ['Order Manager', 'Inventory Management (IMS)'];
+    let core = [];
+    
+    if (state.selChannels.includes('shopify')) core.push('Shopify Integration');
+    if (state.selChannels.includes('b2b')) core.push('B2B Portal API');
+    if (['large', 'xlarge'].includes(sku)) base.push('PIM & Marketplace Manager');
+    if (state.selPains.includes('manual')) base.push('Workflow Automation');
+    if (state.selPains.includes('shipping')) base.push('Shipping Automation');
+    
+    return { base, core };
+  }
+</script>
+</body>
+</html>
